@@ -5,6 +5,7 @@
 
 $(function(){
 
+    var TOUCH_START = 'touchstart', TOUCH_MOVE = 'touchmove', TOUCH_END = 'touchend';
 	var SWIPE = 'swipe', SWIPE_LEFT = 'swipeleft', SWIPE_RIGHT = 'swiperight', SWIPE_UP = 'swipeup', SWIPE_DOWN = 'swipedown';
 	var	SINGLE_TAP = 'singletap', DOUBLE_TAP = 'doubletap', LONG_TAP = 'longtap';
 		
@@ -77,24 +78,24 @@ $(function(){
 				case SWIPE_UP:
 				case SWIPE_DOWN:
 					
-					fn.call(obj, 'touchstart', swipeStart);
-					fn.call(obj, 'touchend', swipeEnd);
+					fn.call(obj, TOUCH_START, swipeStart);
+					fn.call(obj, TOUCH_END, swipeEnd);
 					break;
 					
 				case LONG_TAP:
 				
-					fn.call(obj, 'touchstart',  setLongTap);
-					fn.call(obj, 'touchend touchmove', clearLongTap);
+					fn.call(obj, TOUCH_START,  setLongTap);
+					fn.call(obj, TOUCH_MOVE + ' ' + TOUCH_END, clearLongTap);
 					break;
 				
 				case SINGLE_TAP:
 				
-					fn.call(obj, 'touchstart',  singleTap);
+					fn.call(obj, TOUCH_START,  singleTap);
 					break;
 					
 				case DOUBLE_TAP:
 					
-					fn.call(obj, 'touchstart',  doubleTap);
+					fn.call(obj, TOUCH_START,  doubleTap);
 					break;
 			}
 			
@@ -167,13 +168,11 @@ $(function(){
 			if(distx > 0){
 			
 				el.trigger({type: SWIPE_RIGHT});
-				console.log('swiperight event fired: ' + new Date().valueOf());
 				
 			}
 			else{
 			
 				el.trigger({type: SWIPE_LEFT});
-				console.log('swipeleft event fired: ' + new Date().valueOf());
 			
 			}
 		
@@ -187,13 +186,11 @@ $(function(){
 			if(disty > 0){
 				
 				el.trigger({ type: SWIPE_DOWN });
-				console.log('swipedown event fired: ' + new Date().valueOf());
 				
 			}
 			else{
 				
 				el.trigger({ type: SWIPE_UP });
-				console.log('swipeup event fired: ' + new Date().valueOf());
 				
 			}
 		
@@ -202,7 +199,6 @@ $(function(){
 		if(xSwipe || ySwipe){
 		
 			el.trigger({ type: SWIPE });
-			console.log('swipe event fired: ' + new Date().valueOf());
 				
 		}
 		
@@ -213,6 +209,7 @@ $(function(){
 	function setLongTap(e){
 		
 		e.preventDefault();
+        
 		var el = $(e.target);
 		var id = el.attr('id');
 		el.data('long-tap-started', 1);
@@ -229,8 +226,6 @@ $(function(){
 					position: pos
 				});
 				
-				console.log('long-tap event fired: ' + new Date().valueOf());
-				
 			}
 			
 			el1.data('long-tap-started', 0);
@@ -243,6 +238,7 @@ $(function(){
 	function clearLongTap(e){
 
 		e.preventDefault();
+        
 		var el = $(e.target);
 		var th = el.data('long-tap-th');
 		
@@ -265,8 +261,6 @@ $(function(){
 			position: (e.originalEvent || e).changedTouches[0]
 		});
 		
-		console.log('single-tap event fired: ' + new Date().valueOf());
-		
 	}
 	
 	function doubleTap(e){
@@ -285,8 +279,6 @@ $(function(){
 				type: "doubleTap",
 				position: (e.originalEvent || e).changedTouches[0]
 			});
-			
-			console.log('double-tap event fired: ' + curTime);
 			
 		}
 		else{
