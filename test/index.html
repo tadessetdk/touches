@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<style>
+
+
+
+.images-container{margin:8px;width:275px;height:220px;position:relative;overflow:hidden;background-color:#eee;text-align:center;}
+
+.images-container img.view{ border:none; width:275px; height:195px;position:absolute;text-align:center;}
+
+#imgView2 {left:-10000px;display:none;}
+
+
+
+.full-screen-mode {position :fixed; left:0px; top:0px; bottom:0px; right:0px; height :auto; width :auto; padding-top:16px;}
+
+#imgScreenMode {position:absolute;top:4px;right:4px;z-index:1000;background-color:#ddd;border: solid 1px #ddd;border-radius:1px;}
+
+#imgScreenMode:hover {border: solid 2px #ddd;background-color:#ccc;}
+
+.full-screen-mode #imgScreenMode{border-radius:4px;}
+
+.full-screen-mode img.view{width:100% !important;height:100% !important;overflow:hidden;position:absolute;}
+
+.full-screen-mode #view-container {width:100% !important;height:100% !important;overflow:hidden;position:absolute;left:0px;top:0px;bottom:0px;right:0px;}
+
+
+
+img.arrow {position:absolute;top:40%;left:2%;z-index:1000;background-color:#ddd;border-radius:1px;}
+
+.full-screen-mode img.arrow {border-radius:6px;}
+
+#imgNext {left:auto;right:2%;}
+
+img.arrow:hover {background-color:#ccc;}
+
+.disabled-arrow{background-color:#333 !important;}
+
+
+#footer-note { position:absolute;bottom:0px;padding:4px;font-size:.8em;font-weight:bold;}
+
+.full-screen-mode #footer-note {background-color:#ddd;left:8px;bottom:8px;font-size:1.2em;border-radius:3px;}
+
+
+</style>
+
+
+<script type='text/javascript' src='jquery-1.8.2.min.js'></script>
+
+<body>
+
+
+<div style='width:500px;'>
+
+<div id='imagesContainer' class='images-container'>
+
+<img id='imgScreenMode' src='images/fullscreen.png' title='Fullscreen mode'/>
+
+<div id='view-container' >
+
+<img id='imgView1' class='view' src='images/img1.jpg' />
+
+<img id='imgView2' class='view' src='images/img1.jpg' />
+
+</div>
+
+<img id='imgBack' class='arrow' src='images/arrow-back.png'/>
+
+<img id='imgNext' class='arrow' src='images/arrow-forward.png'/>
+
+<div id='footer-note'></div>
+
+</div>
+
+
+<input id='removeDoubleTap' type='button' value='Unbind DoubleTap'/>
+
+</div>
+
+<script type='text/javascript' src='../touchEvents.js'></script>
+
+<script type='text/javascript'>
+
+
+var imagesCount = 5; 
+
+
+$(function(){
+
+
+
+$(window).bind('load hashchange', loadImage);
+
+
+
+$('#imagesContainer').data('imagesCount', imagesCount);
+
+
+
+$('#imagesContainer').bind('keydown', function(e){
+
+
+
+var key = e.keyCode || e.which;
+
+var next = key == 39;
+
+
+
+if(key == 37 || next){
+
+
+
+setNextImage(next);
+
+
+
+}
+
+else if(key == 27){
+
+
+
+$('#imgScreenMode').click();
+
+
+
+}
+
+
+
+});
+
+
+
+function setNextImage(next){
+
+
+
+var cont = $('#imagesContainer');
+
+
+
+if(cont.data('inProgress')) return;
+
+
+
+var index = getNextIndex(next);
+
+var length = $('#imagesContainer').data('imagesCount');
+
+
+
+if(index <= 0 || index > length) return;
+
+
+
+cont.data('inProgress', 1);
+
+cont.data('dir-next', next);
+
+window.location.hash = '#' + index;
+
+
+
+}
+
+
+
+function getNextIndex(next){
+
+
+
+var cur = parseInt(window.location.hash.substr(1) || 1);
+
+return (next ? 1 : -1) + cur;
+
+
+
+}
+
+
+
+function loadImage(e){
+
+
+
+var cont = $('#imagesContainer');
+
+
+
+var cur = cont.data('cur') || '#imgView1';
+
+var prev = cont.data('prev') || '#imgView2';
+
+var width = $(cur).width() + 'px';
+
+var dirNext = cont.data('dir-next');
+
+var shift = (dirNext ? '+' : '-') + '=' + width;
+
+var prevStartPos = (dirNext ? '-' : '') + width;
+
+
+
+$(cur).css({left: '0px'}).animate( {left: shift}, function(){
+
+
+
+$(this).hide();
+
+
+
+});
+
+
+
+var newHash = window.location.hash;
+
+var index = newHash.substr(1) || '1';
+
+
+
+
+//=> this will render image (not postback nor ajax)
+
+$(prev).css({left: prevStartPos}).attr('src', 'images/img' + index + '.jpg').show().animate( {left: shift}, function(){
+
+
+
+$(this).css({left: '0px'});
+
+cont.data('inProgress', 0);
+
+
+
+});
+
+
+
+var temp = cur;
+
+cont.data('cur', prev);
+
+cont.data('prev', temp);
+
+
+
+setImageDesc(index);
+
+setArrowState(index);
+
+
+
+}
+
+
+
+function setImageDesc(index){
+
+
+
+var length = $('#imagesContainer').data('imagesCount');
+
+$('#footer-note').html(index + ' of ' + length + ' : OPER' + new Date().valueOf());
+
+
+
+}
+
+
+
+function setArrowState(index){
+
+
+
+var length = $('#imagesContainer').data('imagesCount');
+
+$('img.arrow').removeClass('disabled-arrow');
+
+
+
+if(index == 1){
+
+
+
+$('#imgBack').addClass('disabled-arrow');
+
+
+
+}
+
+else if(index == length){
+
+
+
+$('#imgNext').addClass('disabled-arrow');
+
+
+
+}
+
+
+
+}
+
+
+
+$('#imgScreenMode').bind('click', function(){
+
+
+
+if($(this).data('full-screen-mode')){
+
+
+
+$('#imagesContainer').removeClass('full-screen-mode');
+
+$('#footer-note').css({top: '', left: '', fontSize: ''});
+
+$('#imgScreenMode').attr('src', 'images/fullscreen.png').attr('title', 'Fullscreen mode');
+
+$('#imgBack').attr('src', 'images/arrow-back.png');
+
+$('#imgNext').attr('src', 'images/arrow-forward.png');
+
+
+
+}
+
+else{
+
+
+
+$('#imagesContainer').addClass('full-screen-mode');
+
+$('#imgScreenMode').attr('src', 'images/fullscreen_exit.png').attr('title', 'Exit fullscreen mode');
+
+$('#imgBack').attr('src', 'images/arrow-back-big.png');
+
+$('#imgNext').attr('src', 'images/arrow-forward-big.png');
+
+
+
+}
+
+
+
+$(this).data('full-screen-mode', !$(this).data('full-screen-mode'));
+
+
+
+});
+
+
+
+$('#imgBack').bind('click', function(){
+
+
+
+setNextImage(false);
+
+
+
+});
+
+
+
+$('#imgNext').bind('click', function(){
+
+
+
+setNextImage(true);
+
+
+
+});
+
+
+
+$('img.view').bind('swiperight', function(e){
+
+
+
+setNextImage(true);
+
+$('#footer-note').html('swiperight');
+
+
+
+}).bind('swipeleft', function(e){
+
+
+
+setNextImage(false);
+
+$('#footer-note').html('swipeleft');
+
+
+
+}).bind('longTap', function(e){
+
+
+
+var el = $(this);
+
+el.css({ borderLeft: el.data('b') ? 'none' : 'solid 3px #F00'});
+
+el.data('b', !el.data('b'));
+
+
+
+})
+
+.bind('doubleTap', function(e){
+
+
+
+$('#imgScreenMode').click();
+
+
+
+});
+
+
+
+$('#removeDoubleTap').click(function() { $('img.view').unbind('doubletap longtap'); });
+
+
+
+});
+
+
+
+</script>
+
+</body>
+
+</html>
