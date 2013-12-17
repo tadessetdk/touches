@@ -4,7 +4,9 @@
 //-requires jQuery 1.4 or later
 
 $(function(){
-
+  
+	"use strict";
+  
     var TOUCH_START = 'touchstart', TOUCH_MOVE = 'touchmove', TOUCH_END = 'touchend';
 	var SWIPE = 'swipe', SWIPE_LEFT = 'swipeleft', SWIPE_RIGHT = 'swiperight', SWIPE_UP = 'swipeup', SWIPE_DOWN = 'swipedown';
 	var	SINGLE_TAP = 'singletap', DOUBLE_TAP = 'doubletap', LONG_TAP = 'longtap';
@@ -58,13 +60,13 @@ $(function(){
 	function bindTouchEvents(props){
 	
 		var obj = props.obj;
-		var arguments = props.args;
+		var args = props.args;
 		var onType = props.onType;
 		var detach = props.detach;
 		
 		var fn = onType ? ( detach ? jOff : jOn ) : ( detach ? jUnbind : jBind );
 		
-		var touchEvents = getTouchEvents(arguments[0]);
+		var touchEvents = getTouchEvents(args[0]);
 		
 		for(var i = touchEvents.length - 1; i >= 0 ; i--){
 			
